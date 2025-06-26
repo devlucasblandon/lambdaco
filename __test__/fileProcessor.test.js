@@ -15,61 +15,70 @@ describe("processFile", () => {
     jest.clearAllMocks();
   });
 
-  it("debería actualizar los metadatos si el estado de replicación es 'REPLICA'", async () => {
-    getFileReplicationStatus.mockResolvedValue("REPLICA");
-
-    await processFile(bucketName, objectKey);
-
+  // Funciones auxiliares para verificaciones comunes
+  const verifyGetFileReplicationStatusCalled = () => {
     expect(getFileReplicationStatus).toHaveBeenCalledTimes(1);
     expect(getFileReplicationStatus).toHaveBeenCalledWith(bucketName, objectKey);
+  };
 
+  const verifyUpdateFileMetadataCalled = () => {
     expect(updateFileMetadata).toHaveBeenCalledTimes(1);
     expect(updateFileMetadata).toHaveBeenCalledWith(bucketName, objectKey);
-  });
+  };
 
-  it("no debería actualizar los metadatos si el estado de replicación no es 'REPLICA'", async () => {
-    getFileReplicationStatus.mockResolvedValue("PENDING");
-
-    await processFile(bucketName, objectKey);
-
-    expect(getFileReplicationStatus).toHaveBeenCalledTimes(1);
-    expect(getFileReplicationStatus).toHaveBeenCalledWith(bucketName, objectKey);
-
+  const verifyUpdateFileMetadataNotCalled = () => {
     expect(updateFileMetadata).not.toHaveBeenCalled();
+  };
+
+  describe("cuando el estado de replicación es 'REPLICA'", () => {
+    it("debería actualizar los metadatos", async () => {
+      getFileReplicationStatus.mockResolvedValue("REPLICA");
+
+      await processFile(bucketName, objectKey);
+
+      verifyGetFileReplicationStatusCalled();
+      verifyUpdateFileMetadataCalled();
+    });
   });
 
-  it("debería manejar errores al obtener el estado de replicación", async () => {
-    getFileReplicationStatus.mockRejectedValue(new Error("Error al obtener el estado"));
+  describe("cuando el estado de replicación no es 'REPLICA'", () => {
+    it("no debería actualizar los metadatos", async () => {
+      getFileReplicationStatus.mockResolvedValue("PENDING");
 
-    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+      await processFile(bucketName, objectKey);
 
-    await expect(processFile(bucketName, objectKey)).rejects.toThrow(
-      "Error al obtener el estado"
-    );
-
-    expect(updateFileMetadata).not.toHaveBeenCalled();
-
-    consoleSpy.mockRestore();
+      verifyGetFileReplicationStatusCalled();
+      verifyUpdateFileMetadataNotCalled();
+    });
   });
 
-  it("debería manejar errores al actualizar los metadatos", async () => {
-    getFileReplicationStatus.mockResolvedValue("REPLICA");
+  describe("manejo de errores", () => {
+    it("debería manejar errores al obtener el estado de replicación", async () => {
+      getFileReplicationStatus.mockRejectedValue(new Error("Error al obtener el estado"));
 
-    updateFileMetadata.mockRejectedValue(new Error("Error al actualizar metadatos"));
+      const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
-    const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+      await expect(processFile(bucketName, objectKey)).rejects.toThrow(
+        "Error al obtener el estado"
+      );
 
+      verifyUpdateFileMetadataNotCalled();
+      consoleSpy.mockRestore();
+    });
 
-    await expect(processFile(bucketName, objectKey)).rejects.toThrow(
-      "Error al actualizar metadatos"
-    );
+    it("debería manejar errores al actualizar los metadatos", async () => {
+      getFileReplicationStatus.mockResolvedValue("REPLICA");
+      updateFileMetadata.mockRejectedValue(new Error("Error al actualizar metadatos"));
 
-    expect(getFileReplicationStatus).toHaveBeenCalledTimes(1);
-    expect(getFileReplicationStatus).toHaveBeenCalledWith(bucketName, objectKey);
+      const consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
 
-    expect(updateFileMetadata).toHaveBeenCalledTimes(1);
-    expect(updateFileMetadata).toHaveBeenCalledWith(bucketName, objectKey);
+      await expect(processFile(bucketName, objectKey)).rejects.toThrow(
+        "Error al actualizar metadatos"
+      );
 
-    consoleSpy.mockRestore();
+      verifyGetFileReplicationStatusCalled();
+      verifyUpdateFileMetadataCalled();
+      consoleSpy.mockRestore();
+    });
   });
 });
