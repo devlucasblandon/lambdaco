@@ -1,0 +1,14 @@
+function fn() {
+    return {
+        aws: {
+            region: 'us-east-1',
+            lambda: {
+                functionName: 'nu0217001-simetrik-function-transportfile',
+                invocationType: 'RequestResponse',
+                logType: 'Tail',
+                event: '{\"version\": \"0\", \"id\": \"cd5f9f7b-3b4f-4d58-9fbb-051ea010a649\", \"source\": \"aws.events\", \"detail-type\": \"Scheduled Event\", \"account\": \"123456789012\", \"time\": \"2025-01-10T00:00:00Z\", \"region\": \"us-east-1\", \"resources\": [], \"detail\": {}}'}
+            },
+        timeout: '#{listen-timeout}#'
+    };    
+}
+

@@ -1,0 +1,49 @@
+plugins {
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'com.github.ben-manes.versions' version '0.38.0'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    maven { url "https://artifactory.apps.bancolombia.com/maven-bancolombia" }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:2.4.5'
+    }
+}
+
+dependencies {
+    testImplementation 'com.intuit.karate:karate-junit5:1.1.0'
+    testImplementation 'commons-io:commons-io:2.8.0'
+    testImplementation 'net.masterthought:cucumber-reporting:5.5.3'
+    implementation platform('software.amazon.awssdk:bom:2.16.69')
+    testImplementation 'software.amazon.awssdk:glue:2.3.6'
+    testImplementation 'software.amazon.awssdk:lambda'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+}
+
+test {
+    useJUnitPlatform()
+
+    systemProperty "karate.options", System.properties.getProperty("karate.options")
+    systemProperty "karate.env", System.properties.getProperty("karate.env")
+
+    systemProperty "environment", System.properties.getProperty("environment")
+    systemProperty 'aws.accessKeyId', System.properties.getProperty('aws.accessKeyId')
+    systemProperty 'aws.secretKey', System.properties.getProperty('aws.secretKey')
+    systemProperty 'aws.sessionToken', System.properties.getProperty('aws.sessionToken')
+    systemProperty 'accessKeyIdLambda', System.properties.getProperty('accessKeyIdLambda')
+    systemProperty 'secretKeyLambda', System.properties.getProperty('secretKeyLambda')
+    systemProperty 'sessionTokenLambda', System.properties.getProperty('sessionTokenLambda')
+
+    outputs.upToDateWhen { false }
+}

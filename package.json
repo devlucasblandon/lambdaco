@@ -1,0 +1,36 @@
+{
+  "name": "nu0217001_simetrik_s3_replicate_state_lambda",
+  "version": "1.0.0",
+  "description": "lambda to update the tag of a file",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.726.0",
+    "aws-sdk-client-mock": "^4.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://dev.azure.com/GrupoBancolombia/Vicepresidencia%20Servicios%20de%20Tecnolog%C3%ADa/_git/NU0217001_SimetrikS3ReplicateState_Lambda"
+  },
+  "keywords": [
+    "lambda",
+    "simetrik",
+    "replicate",
+    "state"
+  ],
+  "author": "PERSONALSOFT",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "jest --config jest.config.js"
+  },
+  "jest": {
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-sonar": "^0.2.16"
+  }
+}

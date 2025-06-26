@@ -1,0 +1,89 @@
+steps:
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)/node_modules'
+    inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/node_modules'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/node_modules'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)/index'
+    inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: 'index.js'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)/config'
+    inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: 'config/**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)/environments'
+    inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: 'environments/**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)/handlers'
+    inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: 'handlers/**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)/operations'
+    inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: 'operations/**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)/utils'
+    inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: 'utils/**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  - task: ArchiveFiles@2
+    inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip'
+        replaceExistingArchive: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+        PathtoPublish: $(Build.ArtifactStagingDirectory)/$(Build.BuildNumber).zip
+        ArtifactName: Artifact
+  
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact Pruebas Aceptacion'
+    inputs:
+        PathtoPublish: test/acceptance-test/
+        ArtifactName: acceptanceTest
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact Pruebas performance'
+    inputs:
+        PathtoPublish: test/performance-test/
+        ArtifactName: performanceTest
+
+  - task: JFrog.jfrog-artifactory-vsts-extension.artifactory-generic-upload.ArtifactoryGenericUpload@2
+    displayName: 'Publish Artifact to Artifactory'
+    inputs:
+        artifactoryService: Artifactory
+        fileSpec: |
+            {
+              "files": [
+                {
+                  "pattern": "$(Build.ArtifactStagingDirectory)/*.zip",
+                  "target": "$(Artifactory.Repository)/$(Build.BuildNumber)/"
+                }
+              ]
+            }
+        collectBuildInfo: true
